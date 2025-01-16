@@ -6,7 +6,7 @@ from alembic import context
 
 from src.config import settings
 from src.database import Base
-from src.user_request import models
+from src.applications import models
 
 
 config = context.config
