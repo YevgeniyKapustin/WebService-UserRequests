@@ -5,16 +5,18 @@ from sqlalchemy import Column, Integer
 from sqlalchemy.ext.asyncio import (
     AsyncSession, create_async_engine, AsyncEngine, async_sessionmaker
 )
-from sqlalchemy.orm import as_declarative, declared_attr, Mapped
+from sqlalchemy.orm import as_declarative, declared_attr, Mapped, mapped_column
 from sqlalchemy.pool import NullPool
 
 from src.config import settings
-
+from src.utils.database_types import type_annotation_map 
 
 @as_declarative()
 class Base:
     __name__: str
-    id: Mapped[int] = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    type_annotation_map = type_annotation_map
 
     @declared_attr
     def __tablename__(self) -> str:
