@@ -1,4 +1,4 @@
-from uvicorn import uvicorn
+import uvicorn 
 
 from src.main import app
 
