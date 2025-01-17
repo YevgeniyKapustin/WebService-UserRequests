@@ -6,9 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
+from applications.schemas import ApplicationSchema
 from database import get_async_session
 from schemas import NotFoundScheme
-from src.applications.models import Application
+from src.applications.models import Application as ApplicationModel
+from src.applications.sevice import Application
 
 router = APIRouter(
     prefix='/api/v1',
@@ -24,7 +26,7 @@ router = APIRouter(
     ''',
     responses = {
         HTTP_200_OK: {
-            'model': list[Application],
+            'model': list[ApplicationModel],
             'description': 'Список заявок получен',
         },
         HTTP_404_NOT_FOUND: {
@@ -37,40 +39,30 @@ router = APIRouter(
     }
 )
 async def get_application(
-        user_name: Annotated[
-            str | None,
-            Query(
-                title='Имя пользователя',
-                description='Искать по имени пользователя'
-            )
-        ] = None,
+        user_name: Annotated[str | None, Query(title='Имя пользователя',)] = None,
+        page: Annotated[str | None, Query(title='Страница', ge=1)] = None,
+        size: Annotated[str | None, Query(title='Размер страницы', ge=1)] = None,
 
-        session: AsyncSession = Depends(get_async_session),
+        session: AsyncSession = Depends(get_async_session)
 
 ) -> JSONResponse:
-    crud: CommandCRUD = CommandCRUD(
-        type_=command_type,
-        request=request_,
-        is_inline=is_inline
-    )
 
-    return await get_objects(crud, CommandScheme, session)
+    if applications := await Application(user_name).get(session, page, size):
 
+        response: list[dict] = [
+            {
+                attr: getattr(obj, attr)
+                for attr in ApplicationSchema.model_json_schema().get('properties')
+            }
+            for obj in applications
+        ]
+        return JSONResponse(
+            content=response,
+            status_code=HTTP_200_OK,
+        )
 
-# @router.post(
-#     '/commands',
-#     name='Создает команду',
-#     responses=get_create_response()
-# )
-# async def create_command(
-#         command: CommandCreateScheme,
-
-#         session: AsyncSession = Depends(get_async_session),
-
-# ) -> JSONResponse:
-#     obj = CommandCRUD(
-#         type_=command.type,
-#         request=command.request,
-#         response=command.response,
-#     )
-#     return await create_object(obj, session)
+    else:
+        return JSONResponse(
+            content=NotFoundScheme().model_dump(),
+            status_code=HTTP_404_NOT_FOUND,
+        )

@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class Application(BaseModel):
+class ApplicationSchema(BaseModel):
     id: int
     user_name: str
     description: str
