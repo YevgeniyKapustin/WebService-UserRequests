@@ -8,3 +8,7 @@ class ApplicationSchema(BaseModel):
     user_name: str
     description: str
     created_at: datetime
+
+class ApplicationCreateSchema(BaseModel):
+    user_name: str
+    description: str

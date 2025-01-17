@@ -4,11 +4,11 @@ from fastapi import APIRouter, Depends, Path, Query
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
-from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 
-from applications.schemas import ApplicationSchema
+from applications.schemas import ApplicationCreateSchema, ApplicationSchema
 from database import get_async_session
-from schemas import NotFoundScheme
+from schemas import CreateScheme, NotFoundScheme, OkScheme
 from src.applications.models import Application as ApplicationModel
 from src.applications.sevice import Application
 
@@ -46,8 +46,9 @@ async def get_application(
         session: AsyncSession = Depends(get_async_session)
 
 ) -> JSONResponse:
+    searched_application = Application(user_name)
 
-    if applications := await Application(user_name).get(session, page, size):
+    if applications := await searched_application.get(session, page, size):
 
         response: list[dict] = [
             {
@@ -66,3 +67,27 @@ async def get_application(
             content=NotFoundScheme().model_dump(),
             status_code=HTTP_404_NOT_FOUND,
         )
+
+
+@router.post(
+    '/applications',
+    name='Создаёт заявку пользователя',
+    responses={
+        HTTP_201_CREATED: {
+            'model': CreateScheme,
+            'description': 'Заявка создана',
+        }
+    }
+)
+async def create_application(
+        application: ApplicationCreateSchema,
+
+        session: AsyncSession = Depends(get_async_session),
+
+) -> JSONResponse:
+    application = Application(application.user_name, application.description)
+    await application.create(session)
+    return JSONResponse(
+        content=CreateScheme().model_dump(),
+        status_code=HTTP_201_CREATED
+    )
