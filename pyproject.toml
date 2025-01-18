@@ -15,6 +15,8 @@ sqlalchemy = "^2.0.37"
 alembic = "^1.14.0"
 asyncpg = "^0.30.0"
 paginate-sqlalchemy = "^0.3.1"
+confluent-kafka = "^2.8.0"
+aiokafka = "^0.12.0"
 
 
 [build-system]

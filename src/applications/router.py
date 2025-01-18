@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 
+from src.kafka.producer import KafkaProducer
 from src.applications.service import Application
 from src.applications.schemas import ApplicationCreateSchema, ApplicationSchema
 from src.database import get_async_session
@@ -47,7 +48,7 @@ async def get_application(
 
     if applications := await searched_application.get(session, page, size):
 
-        response: list[dict] = [
+        response: list[dict[str]] = [
             ApplicationSchema(
                 id=application.id,
                 username=application.username,

@@ -2,12 +2,14 @@ from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.applications.schemas import ApplicationSchema
+from src.kafka.producer import KafkaProducer 
 from src.applications.models import Application as ApplicationModel
 from src.utils.database_paginations import paginate_query
 
 
 class Application(object):
-    __slots__ = ('username', 'description')
+    __slots__ = ('username', 'description', 'id', 'created_at')
 
     def __init__(
             self, 
@@ -44,14 +46,19 @@ class Application(object):
         """Create application."""
         if self.username and self.description:
             logger.debug(f'Create application by user {self.username}...')
-            session.add(
-                ApplicationModel(
-                    username=self.username,
-                    description=self.description,
-                )
+            application = ApplicationModel(
+                username=self.username,
+                description=self.description,
             )
+            session.add(application)
+
             await session.commit()
-            logger.debug(f'The session was committed.')
+            self.id = application.id
+            self.created_at = application.created_at
+
+
+            await self.publish()
+            logger.debug('The session was committed.')
             logger.debug(f'Application by user {self.username} created.')
             return True
         logger.debug(
@@ -62,3 +69,12 @@ class Application(object):
         )
         return False
     
+    async def publish(self):
+        message: dict[str] = ApplicationSchema(
+            id=self.id,
+            username=self.username,
+            description=self.description,
+            created_at=self.created_at.isoformat(timespec="minutes")
+        ).model_dump_json()
+
+        await KafkaProducer.send_message('applications', message)
