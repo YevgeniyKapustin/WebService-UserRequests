@@ -3,6 +3,7 @@ from loguru import logger
 from starlette.middleware.cors import CORSMiddleware
 
 from src.config import settings
+from src.applications.router import router as router_application
 
 app = FastAPI(
     title='Заявки пользователей API',
@@ -12,7 +13,7 @@ app = FastAPI(
         'defaultModelsExpandDepth': -1
     },
 )
-# app.include_router(user_requests_router)
+app.include_router(router_application)
 
 
 
@@ -24,7 +25,7 @@ app.add_middleware(
     allow_headers=[
         'Access-Control-Allow-Headers', 'Access-Control-Allow-Origin',
         'Content-Type', 'Set-Cookie', 'Authorization'
-    ],
+    ]
 )
 
 

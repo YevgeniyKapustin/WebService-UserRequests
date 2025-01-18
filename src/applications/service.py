@@ -1,20 +1,20 @@
 from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from paginate_sqlalchemy import SqlalchemyOrmPage
 
 from src.applications.models import Application as ApplicationModel
+from src.utils.database_paginations import paginate_query
 
 
 class Application(object):
-    __slots__ = ('user_name', 'description')
+    __slots__ = ('username', 'description')
 
     def __init__(
             self, 
-            user_name: str | None = None, 
+            username: str | None = None, 
             description: str | None = None
         ):
-        self.user_name = user_name
+        self.username = username
         self.description = description
 
     async def get(
@@ -24,22 +24,17 @@ class Application(object):
             size: int | None = None
         ) -> list[ApplicationModel]:
         """Get applications."""
-        query = (
-            select(ApplicationModel)
-            .filter(ApplicationModel.user_name == self.user_name)
+        query = select(ApplicationModel)
 
-            if self.user_name else
+        if self.username:
+            query = query.filter(ApplicationModel.username == self.username)
 
-            select(ApplicationModel)
-        )
-
-        if page and size:
-            query = SqlalchemyOrmPage(query, page=page, items_per_page=size)
+        query = paginate_query(query, page, size)
 
         result = await session.execute(query)
     
-        if applications := await list(result.scalars().all()):
-            logger.debug(f'Finded applications: {[i.request for i in applications]}')
+        if applications := list(result.scalars().all()):
+            logger.debug(f'Finded applications: {len(applications)}')
             return applications
         logger.debug(f'Applications not found')
         return None
@@ -47,21 +42,21 @@ class Application(object):
 
     async def create(self, session) -> bool:
         """Create application."""
-        if self.user_name and self.description:
-            logger.debug(f'Create application by user {self.user_name}...')
+        if self.username and self.description:
+            logger.debug(f'Create application by user {self.username}...')
             session.add(
                 ApplicationModel(
-                    user_name=self.user_name,
+                    username=self.username,
                     description=self.description,
                 )
             )
             await session.commit()
             logger.debug(f'The session was committed.')
-            logger.debug(f'Application by user {self.user_name} created.')
+            logger.debug(f'Application by user {self.username} created.')
             return True
         logger.debug(
             f'''Some data is missing to create the application:
-            user_name: {self.user_name}
+            user_name: {self.username}
             description: {self.description}
             '''
         )

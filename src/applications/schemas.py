@@ -5,10 +5,10 @@ from pydantic import BaseModel
 
 class ApplicationSchema(BaseModel):
     id: int
-    user_name: str
+    username: str
     description: str
-    created_at: datetime
+    created_at: str
 
 class ApplicationCreateSchema(BaseModel):
-    user_name: str
+    username: str
     description: str
