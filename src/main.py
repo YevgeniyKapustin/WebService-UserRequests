@@ -6,6 +6,9 @@ from starlette.middleware.cors import CORSMiddleware
 from src.kafka.producer import KafkaProducer
 from src.config import settings
 from src.applications.router import router as router_application
+from src.utils.logger import unified_logging
+
+unified_logging()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,6 +38,3 @@ app.add_middleware(
         'Content-Type', 'Set-Cookie', 'Authorization'
     ]
 )
-
-
-logger.add('../log.txt')

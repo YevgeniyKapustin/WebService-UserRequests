@@ -11,7 +11,7 @@ from src.kafka.producer import KafkaProducer
 from src.applications.service import Application
 from src.applications.schemas import ApplicationCreateSchema, ApplicationSchema
 from src.database import get_async_session
-from src.schemas import CreateScheme, NotFoundScheme
+from src.utils.schemas import CreateScheme, NotFoundScheme
 
 router = APIRouter(
     prefix='/api/v1',

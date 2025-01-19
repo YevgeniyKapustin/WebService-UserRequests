@@ -7,7 +7,7 @@ class Settings(BaseSettings):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.POSTGRES_URL = str(self.__get_postgres_dsn())
+        self.POSTGRES_URL = str(self.__get_postgres_dsn('async_fallback=True'))
 
     # APP
     ORIGINS: list[str]
@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int
     POSTGRES_DB: str
     POSTGRES_URL: str | None = None
+
+    # Kafka
+    KAFKA_HOST: str
 
     def __get_postgres_dsn(self, query: str | None = None) -> str:
         return PostgresDsn.build(

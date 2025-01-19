@@ -1,3 +1,4 @@
+from venv import logger
 from sqlalchemy import Select
 
 
@@ -10,4 +11,6 @@ def paginate_query(
         query = query.limit(size)
         if page:
             query = query.offset((page - 1) * size)
+            logger.debug(f'Pagination {size} with offset {(page - 1) * size}')
+        logger.debug(f'Pagination {size}')
     return query

@@ -1,5 +1,6 @@
 """Collecting metadata and creating a session"""
 from typing import AsyncGenerator
+from venv import logger
 
 from sqlalchemy import Column, Integer
 from sqlalchemy.ext.asyncio import (
@@ -31,4 +32,6 @@ async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
+        logger.debug('yield session...')
         yield session
+    logger.debug('close session...')

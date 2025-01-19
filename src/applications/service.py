@@ -36,7 +36,7 @@ class Application(object):
         result = await session.execute(query)
     
         if applications := list(result.scalars().all()):
-            logger.debug(f'Finded applications: {len(applications)}')
+            logger.debug(f'Finded applications count: {len(applications)}')
             return applications
         logger.debug(f'Applications not found')
         return None
@@ -53,12 +53,12 @@ class Application(object):
             session.add(application)
 
             await session.commit()
+            logger.debug('The session was committed.')
+
             self.id = application.id
             self.created_at = application.created_at
-
-
             await self.publish()
-            logger.debug('The session was committed.')
+
             logger.debug(f'Application by user {self.username} created.')
             return True
         logger.debug(
@@ -70,11 +70,12 @@ class Application(object):
         return False
     
     async def publish(self):
+        topik = 'applications'
         message: dict[str] = ApplicationSchema(
             id=self.id,
             username=self.username,
             description=self.description,
             created_at=self.created_at.isoformat(timespec="minutes")
         ).model_dump_json()
-
-        await KafkaProducer.send_message('applications', message)
+        logger.info(f'Publish message: {topik}: "{message}"')
+        await KafkaProducer.send_message(topik, message)
