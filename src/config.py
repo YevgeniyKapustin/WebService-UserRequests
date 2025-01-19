@@ -1,11 +1,13 @@
 from pydantic_settings import BaseSettings
-from pydantic import PostgresDsn
+from pydantic import ConfigDict, PostgresDsn
 
 class Settings(BaseSettings):
     """App config."""
+    model_config = ConfigDict(extra='ignore')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.POSTGRES_URL = str(self.__get_postgres_dsn('async_fallback=True'))
+        self.POSTGRES_URL = str(self.__get_postgres_dsn())
 
     # APP
     ORIGINS: list[str]
@@ -29,9 +31,6 @@ class Settings(BaseSettings):
             query=query
         )
 
-    class Config:
-        env_file = '../.env'
-        env_file_encoding = 'utf-8'
 
 
 settings = Settings()
