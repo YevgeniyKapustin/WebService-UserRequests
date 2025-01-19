@@ -8,7 +8,7 @@ class KafkaProducer:
     async def get_instance(cls):
         if cls._instance is None:
             cls._instance = AIOKafkaProducer(
-                bootstrap_servers='localhost:9092'
+                bootstrap_servers='kafka:9092'
             )
             await cls._instance.start()
         return cls._instance

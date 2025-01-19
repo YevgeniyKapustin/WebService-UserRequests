@@ -7,6 +7,9 @@ class Settings(BaseSettings):
         super().__init__(*args, **kwargs)
         self.POSTGRES_URL = str(self.__get_postgres_dsn('async_fallback=True'))
 
+    # APP
+    ORIGINS: list[str]
+
     # Postgres
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
@@ -14,9 +17,6 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int
     POSTGRES_DB: str
     POSTGRES_URL: str | None = None
-
-    # CORS
-    ORIGINS: list[str]
 
     def __get_postgres_dsn(self, query: str | None = None) -> str:
         return PostgresDsn.build(
