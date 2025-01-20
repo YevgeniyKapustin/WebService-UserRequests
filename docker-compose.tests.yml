@@ -1,19 +1,17 @@
 version: '3.8'
 services:
 
-  db:
+  test_db:
     image: postgres:17.2
     env_file:
-      - .env
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+      - ./tests/.env
     ports:
       - '5434:5434'
 
-  zookeeper:
+  test_zookeeper:
     image: confluentinc/cp-zookeeper:7.8.0
     env_file:
-      - .env
+      - ./tests/.env
     healthcheck:
       test: ["CMD", "zkCli.sh", "-server", "localhost:2181", "ls", "/"]
       interval: 10s
@@ -22,12 +20,12 @@ services:
     ports:
       - '2181:2181'
 
-  kafka:
+  test_kafka:
     image: confluentinc/cp-kafka:7.8.0
     env_file:
-      - .env
+      - ./tests/.env
     depends_on:
-      - zookeeper
+      - test_zookeeper
     healthcheck:
       test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
       interval: 30s
@@ -36,20 +34,17 @@ services:
     ports:
       - '9092:9092'
 
-  app:
+  test_app:
     build:
       context: .
     command: >
       sh -c "chmod a+x /app/scripts/*.sh && 
       /app/scripts/run_migrations.sh && 
-      /app/scripts/run_gunicorn.sh"
+      /app/scripts/run_pytest.sh"
     depends_on:
-      - db
-      - kafka
+      - test_db
+      - test_kafka
     env_file:
-      - .env
+      - ./tests/.env
     ports:
       - '8000:8000'
-
-volumes:
-  pgdata:

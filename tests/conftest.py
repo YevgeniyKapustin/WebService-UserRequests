@@ -31,19 +31,9 @@ async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
 app.dependency_overrides[get_async_session] = override_get_async_session
 
 
-@pytest.fixture(autouse=True, scope='session')
-async def prepare_database():
-    """Создает таблицы при прогоне тестов и удаляет при завершении."""
-    async with test_engin.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    yield
-    async with test_engin.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-
-
 @pytest.fixture(scope="session")
 async def async_client() -> AsyncGenerator[AsyncClient, None]:
-    async with AsyncClient(app=app, base_url="http://test") as async_client:
+    async with AsyncClient(app) as async_client:
         yield async_client
 
 

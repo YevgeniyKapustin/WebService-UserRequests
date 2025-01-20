@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     POSTGRES_URL: str | None = None
 
     # Kafka
-    KAFKA_HOST: str
+    KAFKA_PRODUCER_HOST: str
 
     def __get_postgres_dsn(self, query: str | None = None) -> str:
         return PostgresDsn.build(

@@ -27,16 +27,14 @@ async def test_get_application(
     assert response.status_code == HTTP_200_OK
     assert response.content == content
 
-
 async def test_create_application(
         async_client: AsyncClient,
 ):
     response = await async_client.post(
         '/api/v1/applications/',
         json={
-            "type": "string",
-            "request": "string",
-            "response": "string"
+            "username": "test_create_application_name",
+            "description": "test_create_application_desc"
         }
     )
 

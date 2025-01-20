@@ -8,7 +8,7 @@ class KafkaProducer:
     @classmethod
     async def get_instance(cls):
         if cls._instance is None:
-            url = f'{settings.KAFKA_HOST}:9092'
+            url = f'{settings.KAFKA_PRODUCER_HOST}:9092'
             cls._instance = AIOKafkaProducer(
                 bootstrap_servers=url
             )
