@@ -1,12 +1,13 @@
 from loguru import logger
 from aiokafka import AIOKafkaProducer
+from aiokafka.structs import RecordMetadata
 
 from src.config import settings
 class KafkaProducer:
     _instance = None
 
     @classmethod
-    async def get_instance(cls):
+    async def get_instance(cls) -> AIOKafkaProducer:
         if cls._instance is None:
             url = f'{settings.KAFKA_PRODUCER_HOST}:9092'
             cls._instance = AIOKafkaProducer(
@@ -17,17 +18,18 @@ class KafkaProducer:
         return cls._instance
 
     @classmethod
-    async def stop(cls):
+    async def stop(cls) -> None:
         if cls._instance is not None:
             await cls._instance.stop()
             cls._instance = None
             logger.info(f'Kafka Producer stopped')
-    
+            
     @classmethod
-    async def send_message(cls, topic, message):
+    async def send_message(cls, topic, message) -> RecordMetadata | None:
       producer = await cls.get_instance()
       try:
-          await producer.send_and_wait(topic, message.encode('utf-8'))
+          result = await producer.send_and_wait(topic, message.encode('utf-8'))
           logger.debug(f'Kafka sent message to topic: "{topic}"')
+          return result
       except Exception as e:
           logger.error(f'Kafka error sending message to topic: "{topic}": {e}')

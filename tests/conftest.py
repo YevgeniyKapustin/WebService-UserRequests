@@ -1,3 +1,4 @@
+import asyncio
 from typing import AsyncGenerator
 
 import pytest
@@ -39,3 +40,11 @@ async def clean_tables(test_db_session):
 async def client() -> AsyncGenerator[TestClient, any]:
     with TestClient(app) as client:
         yield client
+
+
+@pytest.fixture(scope='session')
+def event_loop(request):
+    """Create an instance of the default event loop for each test case."""
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()

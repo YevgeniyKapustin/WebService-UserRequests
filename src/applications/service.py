@@ -1,9 +1,10 @@
 from loguru import logger
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from aiokafka.structs import RecordMetadata
 
 from src.applications.schemas import ApplicationSchema
-from src.kafka.producer import KafkaProducer 
+from src.kafka.producer import KafkaProducer
 from src.applications.models import Application as ApplicationModel
 from src.utils.database_paginations import paginate_query
 
@@ -69,7 +70,7 @@ class Application(object):
         )
         return False
     
-    async def publish(self):
+    async def publish(self) -> RecordMetadata:
         topik = 'applications'
         message: dict[str] = ApplicationSchema(
             id=self.id,
@@ -78,4 +79,4 @@ class Application(object):
             created_at=self.created_at.isoformat(timespec="minutes")
         ).model_dump_json()
         logger.info(f'Publish message: {topik}: "{message}"')
-        await KafkaProducer.send_message(topik, message)
+        return await KafkaProducer.send_message(topik, message)
