@@ -7,7 +7,7 @@ class Settings(BaseSettings):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.POSTGRES_URL = str(self.__get_postgres_dsn('async_fallback=True'))
+        self.POSTGRES_URL = str(self.__get_postgres_dsn())
 
     # APP
     ORIGINS: list[str]

@@ -2,5 +2,4 @@
 .env
 .pytest_cache
 .coverage
-*.log
-logs
+.log
