@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title='Заявки пользователей API',
+    title=settings.APP_TITLE,
     version='1.0',
     lifespan=lifespan,
     swagger_ui_parameters={
