@@ -5,20 +5,29 @@ services:
     image: postgres:17.2
     env_file:
       - ./tests/.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     ports:
-      - '5434:5434'
-
+      - '5433:5433'
+    networks:
+      - applications_test
+      
   test_zookeeper:
     image: confluentinc/cp-zookeeper:7.8.0
     env_file:
       - ./tests/.env
     healthcheck:
-      test: ["CMD", "zkCli.sh", "-server", "localhost:2181", "ls", "/"]
+      test: ["CMD", "zkCli.sh", "-server", "localhost:2182", "ls", "/"]
       interval: 10s
       timeout: 5s
       retries: 5
     ports:
-      - '2181:2181'
+      - '2182:2182'
+    networks:
+      - applications_test
 
   test_kafka:
     image: confluentinc/cp-kafka:7.8.0
@@ -27,12 +36,14 @@ services:
     depends_on:
       - test_zookeeper
     healthcheck:
-      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9093", "--list"]
       interval: 30s
       timeout: 10s
       retries: 5
     ports:
-      - '9092:9092'
+      - '9093:9093'
+    networks:
+      - applications_test
 
   test_app:
     build:
@@ -47,4 +58,9 @@ services:
     env_file:
       - ./tests/.env
     ports:
-      - '8000:8000'
+      - '8001:8001'
+    networks:
+      - applications_test
+
+networks:
+  applications_test:

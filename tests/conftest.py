@@ -1,9 +1,7 @@
 import asyncio
-from typing import AsyncGenerator
 
 import pytest
 from sqlalchemy import text
-from starlette.testclient import TestClient
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from src.config import Settings
@@ -34,12 +32,6 @@ async def clean_tables(test_db_session):
         async with session.begin():
             for table_for_cleaning in CLEAN_TABLES:
                 await session.execute(text(f'TRUNCATE TABLE {table_for_cleaning};'))
-
-
-@pytest.fixture(scope='function')
-async def client() -> AsyncGenerator[TestClient, any]:
-    with TestClient(app) as client:
-        yield client
 
 
 @pytest.fixture(scope='session')

@@ -18,7 +18,7 @@ docker-compose -f docker-compose.tests.yml up
 ```
 Не обязательно это потребуется, но логи тестов можно посмотреть этой командой:  `# todo: сделать волюм с логами` 
 ```bash
-docker logs test_app
+docker logs --tail 1000 webservice-userrequests_test_app_1
 ```
 
 

@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     # APP
     APP_TITLE: str
-    DEV_MODE: bool
+    TEST_MODE: bool
     ORIGINS: list[str]
 
     # Postgres
@@ -24,6 +24,7 @@ class Settings(BaseSettings):
 
     # Kafka
     KAFKA_PRODUCER_HOST: str
+    KAFKA_PRODUCER_PORT: str
 
     def __get_postgres_dsn(self, query: str | None = None) -> str:
         return str(PostgresDsn.build(
