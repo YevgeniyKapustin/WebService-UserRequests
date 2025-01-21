@@ -1,8 +1,7 @@
-"""Collecting metadata and creating a session"""
+"""Collecting metadata and creating a session."""
 from typing import AsyncGenerator
 from venv import logger
 
-from sqlalchemy import Column, Integer
 from sqlalchemy.ext.asyncio import (
     AsyncSession, create_async_engine, AsyncEngine, async_sessionmaker
 )
@@ -11,6 +10,7 @@ from sqlalchemy.pool import NullPool
 
 from src.config import settings
 from src.utils.database_types import type_annotation_map 
+
 
 @as_declarative()
 class Base:

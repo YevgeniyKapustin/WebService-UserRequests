@@ -25,8 +25,7 @@ class Application(object):
             session: AsyncSession, 
             page: int | None = None, 
             size: int | None = None
-        ) -> list[ApplicationModel]:
-        """Get applications."""
+        ) -> list[ApplicationModel] | None:
         query = select(ApplicationModel)
 
         if self.username:
@@ -43,8 +42,7 @@ class Application(object):
         return None
 
 
-    async def create(self, session) -> bool:
-        """Create application."""
+    async def create(self, session) -> ApplicationModel | None:
         if self.username and self.description:
             logger.debug(f'Create application by user {self.username}...')
             application = ApplicationModel(
@@ -61,22 +59,32 @@ class Application(object):
             await self.publish()
 
             logger.debug(f'Application by user {self.username} created.')
-            return True
+            return application
         logger.debug(
             f'''Some data is missing to create the application:
-            user_name: {self.username}
+            username: {self.username}
             description: {self.description}
             '''
         )
-        return False
-    
-    async def publish(self) -> RecordMetadata:
+        return None
+
+    async def publish(self) -> RecordMetadata | None:
         topik = 'applications'
-        message: dict[str] = ApplicationSchema(
-            id=self.id,
-            username=self.username,
-            description=self.description,
-            created_at=self.created_at.isoformat(timespec="minutes")
-        ).model_dump_json()
-        logger.info(f'Publish message: {topik}: "{message}"')
-        return await KafkaProducer.send_message(topik, message)
+        if self.id and self.username and self.description and self.created_at:
+            message: str = ApplicationSchema(
+                id=self.id,
+                username=self.username,
+                description=self.description,
+                created_at=self.created_at.isoformat(timespec="minutes")
+            ).model_dump_json()
+            logger.info(f'Publish message: {topik}: "{message}"')
+            return await KafkaProducer.send_message(topik, message)
+        logger.debug(
+            f'''Some data is missing to publish the application:
+            id: {self.id}
+            username: {self.username}
+            description: {self.description}
+            created_at: {self.created_at}
+            '''
+        )
+        return None

@@ -3,6 +3,8 @@ from aiokafka import AIOKafkaProducer
 from aiokafka.structs import RecordMetadata
 
 from src.config import settings
+
+
 class KafkaProducer:
     _instance = None
 
@@ -23,13 +25,14 @@ class KafkaProducer:
             await cls._instance.stop()
             cls._instance = None
             logger.info(f'Kafka Producer stopped')
-            
+
     @classmethod
-    async def send_message(cls, topic, message) -> RecordMetadata | None:
+    async def send_message(cls, topic: str, message: str) -> RecordMetadata | None:
       producer = await cls.get_instance()
       try:
-          result = await producer.send_and_wait(topic, message.encode('utf-8'))
+          result: RecordMetadata = await producer.send_and_wait(topic, message.encode('utf-8'))
           logger.debug(f'Kafka sent message to topic: "{topic}"')
           return result
       except Exception as e:
           logger.error(f'Kafka error sending message to topic: "{topic}": {e}')
+          return None

@@ -1,13 +1,10 @@
-from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query
-from loguru import logger
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 
-from src.kafka.producer import KafkaProducer
 from src.applications.service import Application
 from src.applications.schemas import ApplicationCreateSchema, ApplicationSchema
 from src.database import get_async_session
@@ -48,7 +45,7 @@ async def get_application(
 
     if applications := await searched_application.get(session, page, size):
 
-        response: list[dict[str]] = [
+        response: list[dict[str, str]] = [
             ApplicationSchema(
                 id=application.id,
                 username=application.username,
@@ -86,8 +83,8 @@ async def create_application(
         session: AsyncSession = Depends(get_async_session),
 
 ) -> JSONResponse:
-    application = Application(application.username, application.description)
-    await application.create(session)
+    application_obj = Application(application.username, application.description)
+    await application_obj.create(session)
     return JSONResponse(
         content=CreateScheme().model_dump(),
         status_code=HTTP_201_CREATED

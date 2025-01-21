@@ -1,15 +1,17 @@
-from pydantic_settings import BaseSettings
-from pydantic import ConfigDict, PostgresDsn
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import PostgresDsn
 
 class Settings(BaseSettings):
-    """App config."""
-    model_config = ConfigDict(extra='ignore')
+    """App settings."""
+    model_config = SettingsConfigDict(extra='ignore')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.POSTGRES_URL = str(self.__get_postgres_dsn())
+        self.POSTGRES_URL = self.__get_postgres_dsn()
 
     # APP
+    APP_TITLE: str
+    DEV_MODE: bool
     ORIGINS: list[str]
 
     # Postgres
@@ -18,13 +20,13 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str
     POSTGRES_PORT: int
     POSTGRES_DB: str
-    POSTGRES_URL: str | None = None
+    POSTGRES_URL: str = ''
 
     # Kafka
     KAFKA_PRODUCER_HOST: str
 
     def __get_postgres_dsn(self, query: str | None = None) -> str:
-        return PostgresDsn.build(
+        return str(PostgresDsn.build(
             scheme='postgresql+asyncpg',
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD,
@@ -32,7 +34,7 @@ class Settings(BaseSettings):
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
             query=query
-        )
+        ))
 
 
 
